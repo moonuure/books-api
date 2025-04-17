@@ -2,6 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+require("dotenv").config();
+mongoose.connect(process.env.MONGODB_URI);
 
 const app = express();
 
@@ -11,7 +13,10 @@ app.use(bodyParser.json());
 
 // ✅ MongoDB Connection (local or switch to Atlas)
 mongoose
-  .connect("mongodb://127.0.0.1:27017/books") // change to your Atlas URI if needed
+  .connect(
+    "mongodb+srv://subacapp:Alka1%2F1%2Fmnw@cluster0.e2axgho.mongodb.net/books?retryWrites=true&w=majority"
+  )
+  // change to your Atlas URI if needed
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.log("❌ MongoDB connection error:", err));
 
