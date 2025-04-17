@@ -1,27 +1,20 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const bodyParser = require("body-parser");
-require("dotenv").config();
+require("dotenv").config(); // ✅ For .env
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// ✅ Middlewares
+app.use(cors());
+app.use(express.json());
+
+// ✅ MongoDB Connection
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.log("❌ MongoDB connection error:", err));
-
-const app = express();
-
-// ✅ Middleware
-app.use(cors());
-app.use(bodyParser.json());
-
-// ✅ MongoDB Connection (local or switch to Atlas)
-mongoose
-  .connect(
-    "mongodb+srv://subacapp:Alka1%2F1%2Fmnw@cluster0.e2axgho.mongodb.net/books?retryWrites=true&w=majority"
-  )
-  // change to your Atlas URI if needed
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.log("❌ MongoDB connection error:", err));
+  .catch((err) => console.error("❌ MongoDB error:", err));
 
 // ✅ Book Schema
 const bookSchema = new mongoose.Schema({
@@ -34,7 +27,7 @@ const bookSchema = new mongoose.Schema({
   pages: Number,
 });
 
-// ✅ Force exact collection name: "book"
+// ✅ Model + collection name
 const Book = mongoose.model("book", bookSchema, "book");
 
 // ✅ Routes
@@ -45,20 +38,20 @@ app.get("/book", async (req, res) => {
   res.json(books);
 });
 
-// Get one book by ID
+// Get one book
 app.get("/book/:id", async (req, res) => {
   const book = await Book.findById(req.params.id);
   res.json(book);
 });
 
-// Add a new book
+// Create new book
 app.post("/book", async (req, res) => {
   const book = new Book(req.body);
   await book.save();
   res.json({ message: "✅ Book added", book });
 });
 
-// Update a book
+// Update book
 app.put("/book/:id", async (req, res) => {
   const book = await Book.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
@@ -66,13 +59,13 @@ app.put("/book/:id", async (req, res) => {
   res.json({ message: "✏️ Book updated", book });
 });
 
-// Delete a book
+// Delete book
 app.delete("/book/:id", async (req, res) => {
   await Book.findByIdAndDelete(req.params.id);
   res.json({ message: "🗑️ Book deleted" });
 });
 
 // Start the server
-app.listen(3000, () => {
-  console.log("🚀 Server running at http://localhost:3000");
+app.listen(PORT, () => {
+  console.log(`🚀 API running at http://localhost:${PORT}`);
 });
