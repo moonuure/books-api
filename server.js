@@ -1,18 +1,24 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-require("dotenv").config(); // ✅ For .env
+require("dotenv").config(); // Load environment variables
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
-// ✅ Middlewares
+// ✅ Middleware
 app.use(cors());
 app.use(express.json());
 
 // ✅ MongoDB Connection
+const mongoURI = process.env.MONGODB_URI;
+if (!mongoURI) {
+  console.error("❌ MONGODB_URI not found in .env file");
+  process.exit(1);
+}
+
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(mongoURI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB error:", err));
 
@@ -27,7 +33,7 @@ const bookSchema = new mongoose.Schema({
   pages: Number,
 });
 
-// ✅ Model + collection name
+// ✅ Model
 const Book = mongoose.model("book", bookSchema, "book");
 
 // ✅ Routes
@@ -38,13 +44,13 @@ app.get("/book", async (req, res) => {
   res.json(books);
 });
 
-// Get one book
+// Get single book
 app.get("/book/:id", async (req, res) => {
   const book = await Book.findById(req.params.id);
   res.json(book);
 });
 
-// Create new book
+// Create book
 app.post("/book", async (req, res) => {
   const book = new Book(req.body);
   await book.save();
@@ -65,7 +71,7 @@ app.delete("/book/:id", async (req, res) => {
   res.json({ message: "🗑️ Book deleted" });
 });
 
-// Start the server
+// Start server
 app.listen(PORT, () => {
   console.log(`🚀 API running at http://localhost:${PORT}`);
 });
